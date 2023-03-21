@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SQS Lambda
+
+Resources:
+  SqsQueue:
+    Type: AWS::SQS::Queue
+
+  QueueConsumerFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: src/
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Timeout: 3
+      MemorySize: 128
+      Architectures:
+        - x86_64
+      Events:
+        SqsQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SqsQueue.Arn
+            BatchSize: 10
+          
+Outputs:
+  QueueConsumerFunctionName:
+    Description: QueueConsumerFunction
+    Value: !Ref QueueConsumerFunction
+  
+  SQSqueueName:
+    Description: SQS queue
+    Value: !GetAtt SqsQueue.QueueName
+
+  SQSqueueARN:
+    Description: SQS queue ARN
+    Value: !GetAtt SqsQueue.Arn
+
+  SQSqueueURL:
+    Description: SQS queue URL
+    Value: !Ref SqsQueue
